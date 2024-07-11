@@ -18,6 +18,7 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
     files_total: int = 0
     files_matched: int = 0
     loc_total: int = 0
+    loc_max: int = 0
     extensions = {}
 
     for root, _, files in os.walk(repo_path):
@@ -31,19 +32,24 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
             files_matched += 1
 
             if extension not in extensions:
-                extensions[extension] = (0, 0)
+                # files / LoC / LoC avg / LoC max
+                extensions[extension] = (0, 0, 0, 0)
 
-            ext_files = extensions[extension][0] + 1
+            ext_files = extensions[extension][0]
             ext_loc = extensions[extension][1]
+            ext_loc_max = extensions[extension][3]
 
             try:
                 file_loc = loc(root + '/' + file)
+                ext_loc_max = max(ext_loc_max, file_loc)
+                loc_max = max(loc_max, file_loc)
                 loc_total += file_loc
                 ext_loc += file_loc
             except Exception as ex:
                 print(f'Unable to read file {root + "/" + file}: {ex}')
 
-            extensions[extension] = (ext_files, ext_loc)
+            extensions[extension] \
+                = (ext_files + 1, ext_loc, ext_loc / ext_files, ext_loc_max)
 
     print(f'Repo: {os.path.abspath(repo_path)}')
     print(f'Inclusions: {ext_incl}')
@@ -51,6 +57,8 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
     print(f'Files total: {files_total}')
     print(f'Files matched: {files_matched}')
     print(f'LoC total: {loc_total}')
+    print(f'LoC avg: {loc_total / files_total}')
+    print(f'LoC max: {loc_max}')
     print(f'Extensions: {extensions}')
 
 
