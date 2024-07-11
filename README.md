@@ -2,7 +2,7 @@
 
 Collects various repository statistics such as files count by type or lines of code.
 
-## Installcation
+## Installation
 
 ## Usage
 
