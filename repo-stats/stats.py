@@ -16,6 +16,7 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
     :param ext_excl: Extensions to exclude. Ex.: ['.java', '.xml']
     """
     files_total: int = 0
+    files_matched: int = 0
     loc_total: int = 0
     extensions = {}
 
@@ -26,6 +27,8 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
             if (ext_incl and extension not in ext_incl
                     or not ext_excl and extension in ext_excl):
                 continue
+
+            files_matched += 1
 
             if extension not in extensions:
                 extensions[extension] = (1, 0)
@@ -46,6 +49,7 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
     print(f'Inclusions: {ext_incl}')
     print(f'Exclusions: {ext_excl}')
     print(f'Files total: {files_total}')
+    print(f'Files matched: {files_matched}')
     print(f'LoC total: {loc_total}')
     print(f'Extensions: {extensions}')
 
