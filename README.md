@@ -8,16 +8,15 @@ Collects various repository statistics such as files count by type or lines of c
 
 As Python module:
 ```shell
-python -m repo_stats <path_to_a_folder> 
+python -m stats <path_to_a_folder> 
 ```
 
 Output example:
 ```shell
-Repo: \users\repo
-Total files: 100
-Total LoC: 1234235
-Extensions: {
-  '.xml': (233, 12341),
-  '.css': (232, 1231)
-}
+Repo: /Users/scoritt/prj/repo-stats/repo-stats
+Inclusions: ['.py', '.md']
+Exclusions: []
+Files total: 2
+LoC total: 56
+Extensions: {'.py': (3, 56)}
 ```
