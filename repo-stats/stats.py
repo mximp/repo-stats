@@ -31,7 +31,7 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
             files_matched += 1
 
             if extension not in extensions:
-                extensions[extension] = (1, 0)
+                extensions[extension] = (0, 0)
 
             ext_files = extensions[extension][0] + 1
             ext_loc = extensions[extension][1]
