@@ -35,7 +35,7 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
                 # files / LoC / LoC avg / LoC max
                 extensions[extension] = (0, 0, 0, 0)
 
-            ext_files = extensions[extension][0]
+            ext_files = extensions[extension][0] + 1
             ext_loc = extensions[extension][1]
             ext_loc_max = extensions[extension][3]
 
@@ -49,7 +49,7 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
                 print(f'Unable to read file {root + "/" + file}: {ex}')
 
             extensions[extension] \
-                = (ext_files + 1, ext_loc, ext_loc / ext_files, ext_loc_max)
+                = (ext_files, ext_loc, ext_loc / ext_files, ext_loc_max)
 
     print(f'Repo: {os.path.abspath(repo_path)}')
     print(f'Inclusions: {ext_incl}')
