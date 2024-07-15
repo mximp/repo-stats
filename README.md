@@ -8,15 +8,22 @@ Collects various repository statistics such as files count by type or lines of c
 
 As Python module:
 ```shell
-python -m stats <path_to_a_folder> 
+python -m stats /path/to/repo/ ".py .java"  
 ```
 
 Output example:
 ```shell
-Repo: /Users/projects/repo-stats/repo-stats
-Inclusions: ['.py', '.md']
+Repo: /path/to/repo
+Inclusions: ['.py', '.java']
 Exclusions: []
-Files total: 2
-LoC total: 56
-Extensions: {'.py': (3, 56)}
+Files total: 322
+Extensions excluded: {'.md', '', '.idx', '.zip'}
+Files matched: 286
+LoC total: 8064
+LoC avg: 25
+LoC max: 183
+Extensions: {'.py': (280, 8000, 28, 183), '.java': (6, 64, 10, 100)}
 ```
+
+## Collected stats
+
