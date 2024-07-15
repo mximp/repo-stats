@@ -20,6 +20,7 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
     loc_total: int = 0
     loc_max: int = 0
     extensions = {}
+    extensions_excluded = set()
 
     for root, _, files in os.walk(repo_path):
         for file in files:
@@ -27,6 +28,7 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
             _, extension = os.path.splitext(file)
             if (ext_incl and extension not in ext_incl
                     or not ext_excl and extension in ext_excl):
+                extensions_excluded.add(extension)
                 continue
 
             files_matched += 1
@@ -55,6 +57,7 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
     print(f'Inclusions: {ext_incl}')
     print(f'Exclusions: {ext_excl}')
     print(f'Files total: {files_total}')
+    print(f'Extensions excluded: {extensions_excluded}')
     print(f'Files matched: {files_matched}')
     print(f'LoC total: {loc_total}')
     print(f'LoC avg: {loc_total / files_total}')
