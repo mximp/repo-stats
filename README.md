@@ -13,7 +13,7 @@ python -m stats <path_to_a_folder>
 
 Output example:
 ```shell
-Repo: /Users/scoritt/prj/repo-stats/repo-stats
+Repo: /Users/projects/repo-stats/repo-stats
 Inclusions: ['.py', '.md']
 Exclusions: []
 Files total: 2
