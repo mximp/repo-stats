@@ -4,11 +4,16 @@ Collects various repository statistics such as files count by type or lines of c
 
 ## Installation
 
+Just clone this repo:
+```shell
+git clone https://github.com/mximp/repo-stats.git
+```
+
 ## Usage
 
 As Python module:
 ```shell
-python -m stats /path/to/repo/ ".py .java"  
+python -m stats -i ".java" -i ".py" /path/to/repo/  
 ```
 
 Output example:
