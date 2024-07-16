@@ -1,5 +1,6 @@
 import os
 from typing import List
+import click as clk
 
 
 def loc(file: str) -> int:
@@ -8,6 +9,10 @@ def loc(file: str) -> int:
         return sum(1 for _ in f)
 
 
+@clk.command()
+@clk.option('--incl', '-i', 'ext_incl', multiple=True, default=[])
+@clk.option('--excl', '-e', 'ext_excl', multiple=True, default=[])
+@clk.argument('repo_path', type=clk.Path(exists=True))
 def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
     """ Prints stats for given repo
 
@@ -27,7 +32,7 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
             files_total += 1
             _, extension = os.path.splitext(file)
             if (ext_incl and extension not in ext_incl
-                    or not ext_excl and extension in ext_excl):
+                    or ext_excl and extension in ext_excl):
                 extensions_excluded.add(extension)
                 continue
 
@@ -48,7 +53,7 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
                 loc_total += file_loc
                 ext_loc += file_loc
             except Exception as ex:
-                print(f'Unable to read file {root + "/" + file}: {ex}')
+                print(f'Unable to read file {root + "/" + file}: {ex} ')
 
             extensions[extension] \
                 = (ext_files, ext_loc, ext_loc / ext_files, ext_loc_max)
@@ -66,5 +71,5 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
 
 
 if __name__ == '__main__':
-    print_stat('./', ['.py', '.md'], [])
+    print_stat()
 
