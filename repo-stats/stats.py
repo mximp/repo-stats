@@ -1,6 +1,6 @@
 import os
 from abc import ABC, abstractmethod
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import click as clk
 
 
@@ -19,15 +19,20 @@ class Stat(ABC):
 
 
 class FilesCount(Stat):
-    """ Calculates a number of files """
+    """ Calculates a number of files per extension"""
     def __init__(self):
-        self._count: int = 0
+        self._ext: Dict[str, int] = {}
 
     def consume(self, root: str, file: str, ext: str) -> None:
-        self._count += 1
+        if ext not in self._ext:
+            self._ext[ext] = 0
+        self._ext[ext] += 1
 
-    def count(self) -> int:
-        return self._count
+    def total(self) -> int:
+        return sum(count for count in self._ext.values())
+
+    def ext_count(self, ext: str) -> int:
+        return self._ext[ext]
 
 
 class Extensions(Stat):
@@ -38,27 +43,39 @@ class Extensions(Stat):
     def consume(self, root: str, file: str, ext: str) -> None:
         self._exts.add(ext)
 
-    def extensions(self) -> set:
+    def all(self) -> set:
         return self._exts
 
 
 class Loc(Stat):
-    """ Collects lines of code """
+    """ Collects lines of code (LoC) per extension.
+    Calculates total and maximum per extension.
+    """
     def __init__(self):
-        self._count: int = 0
-        self._max: int = 0
+        self._ext: Dict[str, Tuple[int, int]] = {}
 
     def consume(self, root: str, file: str, ext: str) -> None:
-        with open(file, 'r', encoding='utf8') as f:
-            loc_in_file = sum(1 for _ in f)
-            self._count += loc_in_file
-            self._max = max(self._max, loc_in_file)
+        with open(root + '/' + file, 'r', encoding='utf8') as f:
+            in_file = sum(1 for _ in f)
+            if ext not in self._ext:
+                self._ext[ext] = (0, 0)
+            ext_total, ext_max = self._ext[ext]
+            self._ext[ext] = (
+                ext_total + in_file,
+                max(ext_max, in_file)
+            )
 
     def total(self) -> int:
-        return self._count
+        return sum(count[0] for count in self._ext.values())
 
-    def max(self) -> int:
-        return self._max
+    def loc(self, ext: str) -> int:
+        return self._ext[ext][0]
+
+    def max(self):
+        return sum(count[1] for count in self._ext.values())
+
+    def ext_max(self, ext: str) -> int:
+        return self._ext[ext][1]
 
 
 class Repo:
@@ -96,9 +113,11 @@ class Repo:
                 [stat.consume(root, file, ext) for stat in self._stats.values()]
                 if (self._incl and ext not in self._incl
                         or self._excl and ext in self._excl):
-                    [stat.consume(root, file, ext) for stat in self._excl_stats.values()]
+                    [stat.consume(root, file, ext)
+                     for stat in self._excl_stats.values()]
                 else:
-                    [stat.consume(root, file, ext) for stat in self._incl_stats.values()]
+                    [stat.consume(root, file, ext)
+                     for stat in self._incl_stats.values()]
 
 
 @clk.command()
@@ -133,22 +152,29 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
         incl=ext_incl
     ).iterate()
 
-    files_total = for_all['Files'].count()
+    files_total = for_all['Files'].total()
     loc_total = included_only['LoC'].total()
     loc_max = included_only['LoC'].max()
+    ext_loc_stats = {
+        ext: (
+            included_only['LoC'].loc(ext),
+            included_only['LoC'].ext_max(ext),
+            included_only['LoC'].loc(ext) / included_only['Matched files'].ext_count(ext)
+        )
+        for ext in included_only['Matched extensions'].all()
+    }
 
     print(f'Repo: {os.path.abspath(repo_path)}')
     print(f'Inclusions: {ext_incl}')
     print(f'Exclusions: {ext_excl}')
     print(f'Files total: {files_total}')
-    print(f'Extensions excluded: {excluded_only['Excluded extensions']
-          .extensions()}')
-    print(f'Files matched: {included_only['Matched files'].count()}')
-    print(f'Files excluded: {excluded_only['Excluded files'].count()}')
+    print(f'Extensions excluded: {excluded_only['Excluded extensions'].all()}')
+    print(f'Files matched: {included_only['Matched files'].total()}')
+    print(f'Files excluded: {excluded_only['Excluded files'].total()}')
     print(f'LoC total: {loc_total}')
     print(f'LoC avg: {loc_total / files_total}')
     print(f'LoC max: {loc_max}')
-    print(f'Extensions: {included_only['Matched extensions'].extensions()}')
+    print(f'Extensions (files/max/avg): {ext_loc_stats}')
 
 
 if __name__ == '__main__':
