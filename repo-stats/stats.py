@@ -1,4 +1,5 @@
 import os
+import re
 from abc import ABC, abstractmethod
 from typing import List, Dict, Tuple
 import click as clk
@@ -47,11 +48,33 @@ class Extensions(Stat):
         return self._exts
 
 
+class RegExLoc(Stat):
+    """ Calculates LoC for specific regular expression """
+
+    def __init__(self, exts: List[str], pattern: str):
+        self._exts = exts
+        self._pattern = pattern
+        self._count = 0
+
+    def consume(self, root: str, file: str, ext: str) -> None:
+        if self._exts and ext not in self._exts:
+            return
+        with open(root + '/' + file, 'r', encoding='utf8') as f:
+            ptn = re.compile(self._pattern)
+            for line in f:
+                if ptn.match(line):
+                    self._count += 1
+
+    def total(self) -> int:
+        return self._count
+
+
 class Loc(Stat):
     """ Collects lines of code (LoC) per extension.
     Calculates total and maximum per extension.
     """
     def __init__(self):
+        #
         self._ext: Dict[str, Tuple[int, int]] = {}
 
     def consume(self, root: str, file: str, ext: str) -> None:
@@ -136,7 +159,8 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
     included_only = {
         'Matched files': FilesCount(),
         'LoC': Loc(),
-        'Matched extensions': Extensions()
+        'Matched extensions': Extensions(),
+        'Python classes': RegExLoc(['.py'], '^class .*')
     }
     excluded_only = {
         'Excluded files': FilesCount(),
@@ -165,8 +189,8 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
     }
 
     print(f'Repo: {os.path.abspath(repo_path)}')
-    print(f'Inclusions: {ext_incl}')
-    print(f'Exclusions: {ext_excl}')
+    print(f'Inclusions spec: {ext_incl}')
+    print(f'Exclusions spec: {ext_excl}')
     print(f'Files total: {files_total}')
     print(f'Extensions excluded: {excluded_only['Excluded extensions'].all()}')
     print(f'Files matched: {included_only['Matched files'].total()}')
@@ -174,7 +198,8 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
     print(f'LoC total: {loc_total}')
     print(f'LoC avg: {loc_total / files_total}')
     print(f'LoC max: {loc_max}')
-    print(f'Extensions (files/max/avg): {ext_loc_stats}')
+    print(f'Classes: {included_only['Python classes'].total()}')
+    print(f'Extensions (LoC/max/avg): {ext_loc_stats}')
 
 
 if __name__ == '__main__':
