@@ -160,7 +160,8 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
         'Matched files': FilesCount(),
         'LoC': Loc(),
         'Matched extensions': Extensions(),
-        'Python classes': RegExLoc(['.py'], '^class .*')
+        'Python classes': RegExLoc(['.py'], '^class .*'),
+        'Java classes': RegExLoc(['.java'], 'class [A-Z].*')
     }
     excluded_only = {
         'Excluded files': FilesCount(),
@@ -196,9 +197,10 @@ def print_stat(repo_path: str, ext_incl: List, ext_excl: List):
     print(f'Files matched: {included_only['Matched files'].total()}')
     print(f'Files excluded: {excluded_only['Excluded files'].total()}')
     print(f'LoC total: {loc_total}')
-    print(f'LoC avg: {loc_total / files_total}')
+    print(f'LoC avg: {loc_total / included_only['Matched files'].total()}')
     print(f'LoC max: {loc_max}')
-    print(f'Classes: {included_only['Python classes'].total()}')
+    print(f'Classes: {included_only['Python classes'].total() 
+                      + included_only['Java classes'].total()}')
     print(f'Extensions (LoC/max/avg): {ext_loc_stats}')
 
 
