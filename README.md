@@ -13,6 +13,7 @@ git clone https://github.com/mximp/repo-stats.git
 
 As Python module:
 ```shell
+#runs under `repo-stats/repo-stats` folder
 python -m stats -i ".java" -i ".py" /path/to/repo/  
 ```
 
